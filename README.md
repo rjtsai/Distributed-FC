@@ -41,8 +41,8 @@ For consistency:
 ## Notes
 I'm using [DBeaver](https://dbeaver.io/) to view and clean db content before exporting to `./data`.
 * only using data from the 2015/2016 season due to entry uniformity/completion
-* some files need to be further cleaned to sort out dupes bc idk how to perform fuzzy searches w SQL
-  * `Team_Attributes.csv`: Teams have multiple entries from different seasons, we only want entries dated 2015
+* some files need to be further cleaned to sort out dupes 
+  * `Team_Attributes.csv`: Some teams that appear in `Teams` do not have data entries in 2015 in `Team_Attributes`
   
 `Team_Attributes` stats have a variety of options
 * ie. x`Passing` can be normal, risky, or safe
