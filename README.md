@@ -1,5 +1,5 @@
 # Distributed-FC
-Do we wanna call it football or soccer? 
+Football or soccer? 
 
 ## ./data
 [European Soccer Database (Kaggle)](https://www.kaggle.com/datasets/hugomathien/soccer?resource=download)
