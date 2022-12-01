@@ -1,6 +1,11 @@
 # Distributed-FC
 Football or soccer? 
 
+## Spec
+`project sdk`: `1.8.0` <br />
+`scala`: `2.11.8` <br />
+`sbt`: `1.3.12`
+
 ## ./data
 [European Soccer Database (Kaggle)](https://www.kaggle.com/datasets/hugomathien/soccer?resource=download)
 
