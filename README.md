@@ -45,6 +45,7 @@ For consistency:
 
 ## Notes
 I'm using [DBeaver](https://dbeaver.io/) to view and clean db content before exporting to `./data`.
+* Idk how to integrate sql worksheets from DBeaver into a gh repo, I can share the sql code I'm using separately
 * only using data from the 2015/2016 season due to entry uniformity/completion
 * some files need to be further cleaned to sort out dupes 
   * `Team_Attributes.csv`: Some teams that appear in `Teams` do not have data entries in 2015 in `Team_Attributes`
