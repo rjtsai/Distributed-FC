@@ -22,9 +22,9 @@ For consistency:
 ### `Team_Attributes`
 `Id`: Int <br/>
 `date`: Date() <br/>
-`buSpeed`: String <br/>
-`buDribbling`: String <br/>
-`buPassing`: String <br/>
+`buSpeed`: String options: slow, balanced, fast<br/>
+`buDribbling`: String options: little, normal, lots<br/>
+`buPassing`: String options: short, mixed, long<br/>
 `buPositioning`: String <br/>
 `ccPassing`: String <br/>
 `ccCrossing`: String <br/>
