@@ -4,11 +4,12 @@ ThisBuild / scalaVersion := "2.11.8"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "distributed-fc"
+    name := "distributed-fc",
   )
 
 libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % "2.3.2",
-  "org.apache.spark" %% "spark-sql" % "2.3.2"
+  "org.apache.spark" %% "spark-sql" % "2.3.2",
+  "org.apache.spark" %% "spark-mllib" % "2.4.0",
 )
 
