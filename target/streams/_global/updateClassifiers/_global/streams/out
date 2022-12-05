@@ -1,4 +1,4 @@
 [debug] "not up to date. inChanged = true, force = false
-[debug] Updating ProjectRef(uri("file:/Users/ryantsai/Desktop/Projects/Distributed-FC/"), "root")...
-[debug] Done updating ProjectRef(uri("file:/Users/ryantsai/Desktop/Projects/Distributed-FC/"), "root")
+[debug] Updating ProjectRef(uri("file:/Users/walte/Desktop/csc%20369/project/Distributed-FC/"), "root")...
+[debug] Done updating ProjectRef(uri("file:/Users/walte/Desktop/csc%20369/project/Distributed-FC/"), "root")
 [warn] There may be incompatibilities among your library dependencies; run 'evicted' to see detailed eviction warnings.
