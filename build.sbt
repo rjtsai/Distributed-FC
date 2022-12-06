@@ -4,7 +4,7 @@ ThisBuild / scalaVersion := "2.11.8"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "distributed-fc",
+    name := "distributed-fc"
   )
 
 libraryDependencies ++= Seq(
