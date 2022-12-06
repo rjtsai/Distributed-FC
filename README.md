@@ -23,9 +23,9 @@ For consistency:
 `Id`: Int <br/>
 `date`: Date() <br/>
 `buSpeed`: String <br/>
-`buDribbling`: String <br/>
-`buPassing`: String <br/>
-`buPositioning`: String <br/>
+`buSpeed`: String options: slow, balanced, fast<br/>
+`buDribbling`: String options: little, normal, lots<br/>
+`buPassing`: String options: short, mixed, long<br/>
 `ccPassing`: String <br/>
 `ccCrossing`: String <br/>
 `ccShooting`: String <br/>
