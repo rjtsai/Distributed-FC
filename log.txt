@@ -1,0 +1,7 @@
+Ryan:
+- Initialize Spark/scala project and repo + README, 45m
+- SQL to clean and export data from initial sqlite db, 1.5h
+- Create custom classes, 30m
+- Create initial RDDs from cleaned dataset, 45m
+- Setup some initial RDDs from joining relevant datasets, 1h
+- Some LR research, setting up for computing LR, 1h

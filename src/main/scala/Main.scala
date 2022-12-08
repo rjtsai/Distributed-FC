@@ -4,6 +4,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.ml.feature.Normalizer
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.feature.VectorAssembler
+import scala.collection.immutable.IntMap
 
 import java.io.PrintWriter
 
@@ -119,6 +120,37 @@ object Main {
     }}.groupByKey().mapValues(m => {
       m.groupBy(_._1).mapValues(_.size).toList.sortBy(_._1 * -1).map(_._2);
     }).map({ case (team, record) => (team.id,record)})
+
+    // teams with records split home/away
+    // ((Team(), home/away), Map(numLoss -> Int, numWin -> Int, numDraw -> Int)
+    // home = 1, away = -1
+    // loss = -1, win = 1, draw = 0
+    val teamWithRecordHA = sc.parallelize(matchData.map { x => {
+      List((x.homeID, x), (x.awayID, x))
+    }}.collect().toList.flatten).rightOuterJoin(teamData.map { x => {
+      (x.id, x)
+    }}).map { case (_, (m, team)) => {
+      (team, m.getOrElse(None))
+    }}.filter(_._2 != None).map{case (t, m) => {
+      var currMatch = m.asInstanceOf[Matches]
+      ((t, findHomeAway(currMatch, t.id)), calculateMatchOutcome(currMatch, t.id))
+    }}.groupByKey().mapValues(x => x.groupBy(identity).mapValues(_.size))
+
+    def combineRecords(r1: Map[Int, Int], r2: Map[Int, Int]): Map[Int, Int] = {
+      var loss: Int = r1.get(-1).get + r2.get(-1).get
+      var win = r1.get(1).getOrElse(0) + r2.get(1).getOrElse(0)
+      var draw = r1.get(0).getOrElse(0) + r2.get(0).getOrElse(0)
+      Map(-1 -> loss, 1 -> win, 0 -> draw)
+    }
+
+    // finds w/d/l % of home and away teams
+    // ("home" or "away", (win%, draw%, loss%))
+    val aggregatedRecordsOfHA = teamWithRecordHA.map({case ((_, ha), record) => {
+      (ha, record)
+    }}).reduceByKey(combineRecords(_, _)).map{case (ha, record) => {
+      var totalGames = record.foldLeft(0)(_+_._2).toDouble
+      (if(ha == 1) "home" else "away", (record.get(1).get.toDouble / totalGames, record.get(0).get.toDouble / totalGames, record.get(-1).get.toDouble / totalGames))
+    }}
 
     //Find the first 6 GD scores for all the teams in 2015/16 season premier league
     //still splits the data

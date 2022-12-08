@@ -1,0 +1,1 @@
+SELECT team_api_id, team_long_name FROM "Team";
