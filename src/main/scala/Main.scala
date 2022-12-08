@@ -157,7 +157,7 @@ object Main {
     // Set up RDD from out.txt?
     // LR needs to read from the file we just created
 
-    val pw = new PrintWriter("./output/TestLR.csv")
+    val pw = new PrintWriter("./output/TrainLR.csv")
 
     val GD_table = matchData.filter(x => {x.leagueID == 1729 && x.season == "2015/2016"}).
       sortBy(x => x.homeID).
@@ -169,12 +169,11 @@ object Main {
 
     def calculateLM(): Unit = {
 
-      //Dependent variable => Home Team goals - Away Team goals
-      //Independent variable => Average previous Home Team record
-      //Independent variable => Average previous Away Team record
+      //Dependent variable => Goal Difference
+      //Independent variable => Match record
       var df = spark.sqlContext.read.format("csv").
         option("header","false").
-        option("inferSchema","true").csv("./output/TestLR.csv").
+        option("inferSchema","true").csv("./output/TrainLR.csv").
         toDF("TEAM","GD1","GD2","GD3","GD4","GD5","label")
 
 
@@ -200,7 +199,7 @@ object Main {
       //Our two teams that we want to predict performance against each other
       var testData = spark.sqlContext.read.format("csv").
         option("header", "false").
-        option("inferSchema", "true").csv("./data/TargetLR").
+        option("inferSchema", "true").csv("./output/TestLR.csv").
         toDF("TEAM", "GD1", "GD2", "GD3", "GD4", "GD5", "label")
 
       val assembler2 = new VectorAssembler()
@@ -233,24 +232,22 @@ object Main {
     def getTwoTeams(): Unit = {
 //      val team1 = scala.io.StdIn.readLine("Input team id 1: ").toInt()
 //      val team2 = scala.io.StdIn.readLine("Input team id 2: ").toInt()
-      val team1 = 9987
-      val team2 = 9984
+      val team1 = 98
+      val team2 = 8678
+      val pw = new PrintWriter("./output/TestLR.csv")
 
-      val team_GD = sc.parallelize(matchData.filter(x => {
-        x.leagueID == 1729 && x.season == "2015/2016" &&
-          (x.homeID == team1 || x.homeID == team2)
+      val team_GD = matchData.filter(x => {
+        x.leagueID == 1729 && x.season == "2015/2016" && (x.homeID == team1 || x.homeID == team2)
       })
         .map(x => (x.homeID, x.home_team_Goals - x.away_team_Goals))
-        .collect().groupBy({ case (team, id) => team})
-        .map({ case (team, match_gd) => team + ", " + match_gd(0)._2 +
-                        ", " + match_gd(1)._2 + ", " + match_gd(2)._2 +
-                        ", " + match_gd(3)._2 + ", " + match_gd(4)._2 +
-                        ", " + match_gd(5)._2 }).toList)
-      team_GD.collect().foreach(println(_))
+        .groupByKey().mapValues(x => x.toList).collect().map({ case (team, gd) =>
+        pw.write(team + ", " + gd(0) + ", " + gd(1) + ", " + gd(2) + ", " + gd(3) + ", " + gd(4) + ", " + gd(5) + "\r\n")
+      })
+      pw.close()
     }
 
-    calculateLM()
     getTwoTeams()
+    calculateLM()
 
   }
 }
