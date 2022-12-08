@@ -8,9 +8,10 @@ Ryan:
 
 Walter:
 - Researched linear regression - 1.5h
-- Tested model predictions with different teams - 30m
+- Tested model predictions with different teams - 1h
 - Analyzed/Updated some of our custom classes and setup - 30m
 - Organized our meeting teams (Creating discord/ppt/docs/report) - 45m
+- Did SQL transformations to help create our training and test data - 1.5h
 - Wrote code to build our linear regression model with our training data - 3h
 
 Joshua
