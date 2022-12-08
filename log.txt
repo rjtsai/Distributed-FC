@@ -4,7 +4,9 @@ Ryan:
 - Create custom classes, 30m
 - Create initial RDDs from cleaned dataset, 45m
 - Setup some initial RDDs from joining relevant datasets, 1h
-- Some LR research, setting up for computing LR, 1h
+- Some LR research, setting up for computing LR, 45m
+- Create models using scala ops for analyzing home advantage 45m
+- Create models using scala ops for analyzing how groups of team_attributes affected how successfull a team is. 1.5h
 
 Walter:
 - Researched linear regression - 1.5h
