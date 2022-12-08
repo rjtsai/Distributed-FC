@@ -12,3 +12,7 @@ Walter:
 - Analyzed/Updated some of our custom classes and setup - 30m
 - Organized our meeting teams (Creating discord/ppt/docs/report) - 45m
 - Wrote code to build our linear regression model with our training data - 3h
+
+Joshua
+- Researched Linear Regression models - 2h
+-
