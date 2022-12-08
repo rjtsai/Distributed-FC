@@ -4,7 +4,9 @@ Ryan:
 - Create custom classes, 30m
 - Create initial RDDs from cleaned dataset, 45m
 - Setup some initial RDDs from joining relevant datasets, 1h
-- Some LR research, setting up for computing LR, 1h
+- Some LR research, setting up for computing LR, 45m
+- Create models using scala ops for analyzing home advantage 45m
+- Create models using scala ops for analyzing how groups of team_attributes affected how successfull a team is. 1.5h
 
 Walter:
 - Researched linear regression - 1.5h
@@ -18,4 +20,8 @@ Joshua
 - Researched Linear Regression models - 2h
 - Wrote code from Linear Regression model based on team pairings and their goal difference - 1h
 - Wrote function to convert two team names to their ids, get their gd match history, and save to CSV - 30m
+<<<<<<< HEAD
 - Report work - 1h
+=======
+- Report work -
+>>>>>>> bc6b6add94439a95032c6580d89a2d08d4a65b6d
