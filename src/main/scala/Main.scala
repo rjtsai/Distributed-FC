@@ -8,7 +8,6 @@ import org.apache.spark.ml.feature.VectorAssembler
 import java.io.PrintWriter
 import scala.collection.mutable
 
-
 /**
  * Data:
  * - for some reason, grabbing all teamAttributes from the 2015/2016 season yields ~30-40 fewer teams than
@@ -292,19 +291,20 @@ object Main {
         .setP(2.0)
         .transform(assembler2)
 
-      //USE the entire data set for building the model
-      val  trainingData = normalizer
+      //Will need to split
+      val  Array(trainingData,rest) = normalizer.randomSplit(Array(0.7,0.3))
+
       val lrModel = lr.fit(trainingData)
 
       lrModel.transform(normalizer2).select("TEAM","label","prediction").show()
 
       // Summarize the model over the training set and print out some metrics
       println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
-//      val trainingSummary = lrModel.summary
+      val trainingSummary = lrModel.summary
 //      println(s"numIterations: ${trainingSummary.totalIterations}")
 //      println(s"objectiveHistory: [${trainingSummary.objectiveHistory.mkString(",")}]")
 //      trainingSummary.residuals.show()
-//      println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+      println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
 //      println(s"r2: ${trainingSummary.r2}")
     }
 
@@ -326,6 +326,7 @@ object Main {
       s
     }
 
+    // ensure both teams are in the same league
     def getTwoTeams(team1: Int, team2: Int, season: String, leagueID: Int): Unit = {
       val pw = new PrintWriter("./output/TestLR.csv")
       val team_GD = matchData.filter(x => {
@@ -338,11 +339,12 @@ object Main {
       pw.close()
     }
 
+    // 2 Teams must be in the same league
     val teamIDs = getTeamIds("Bournemouth", "Arsenal")
     createTrainingData(teamIDs._1, teamIDs._2)
     getTwoTeams(teamIDs._1, teamIDs._2, "2015/2016", 1729)
-    calculateLM()
     val real_outcomes = getRealMatchOutcome(teamIDs._1, teamIDs._2,"2015/2016", 1729)
+    calculateLM()
     real_outcomes.foreach(println)
   }
 }
