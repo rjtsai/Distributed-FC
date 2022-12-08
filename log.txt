@@ -15,4 +15,6 @@ Walter:
 
 Joshua
 - Researched Linear Regression models - 2h
--
+- Wrote code from Linear Regression model based on team pairings and their goal difference - 1h
+- Wrote function to convert two team names to their ids, get their gd match history, and save to CSV - 30m
+- Report work -
