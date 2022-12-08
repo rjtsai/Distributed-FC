@@ -4,7 +4,9 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.ml.feature.Normalizer
 import org.apache.spark.ml.regression.LinearRegression
 import org.apache.spark.ml.feature.VectorAssembler
+
 import java.io.PrintWriter
+import scala.collection.mutable
 
 
 /**
@@ -161,6 +163,7 @@ object Main {
     def findNumGoalsAgainst(id: Int, m: Matches): Int = {
       if (id == m.homeID) m.awayGoals else m.homeGoals
     }
+
     // find xG for team
     // (Team, xG)
     val teamWithxGFor = sc.parallelize(matchData.map { x => {
@@ -225,31 +228,33 @@ object Main {
     }
     }.groupByKey().mapValues(x => x.sum / x.size).collect().sortBy(_._2)
 
-    //Find the first 6 GD scores for all the teams in 2015/16 season premier league
-    //still splits the data
-    // Set up RDD from out.txt?
-    // LR needs to read from the file we just created
+    def createTrainingData(team1: Int, team2: Int): Unit = {
+      //Find the first 6 GD scores for all the teams in 2015/16 season premier league
+      //still splits the data
+      // Set up RDD from out.txt?
+      // LR needs to read from the file we just created
 
-    val pw = new PrintWriter("./output/TestLR.csv")
+      val pw = new PrintWriter("./output/TrainLR.csv")
 
-    val GD_table = matchData.filter(x => {x.leagueID == 1729 && x.season == "2015/2016"}).
-      sortBy(x => x.homeID).
-      map(x => (x.homeID, x.homeGoals - x.awayGoals)).
-      groupByKey().mapValues(x => x.toList).collect().map({case (team, gd) =>
-      pw.write(team + ", " + gd(0) + ", " + gd(1) + ", " + gd(2) + ", " + gd(3) + ", " + gd(4) + ", " + gd(5) + "\r\n")
-    })
-    pw.close()
+      val All_teams_GD = matchData.filter(x => {
+        x.leagueID == 1729 && x.season == "2015/2016" && (x.homeID != team1 || x.awayID != team2) &&
+          (x.homeID != team2 || x.awayID != team1)
+      }).
+        sortBy(x => x.homeID).
+        map(x => (x.homeID, x.homeGoals - x.awayGoals)).
+        groupByKey().mapValues(x => x.toList).collect().map({ case (team_id, gd) =>
+        pw.write(team_id + ", " + gd(0) + ", " + gd(1) + ", " + gd(2) + ", " + gd(3) + ", " + gd(4) + ", " + gd(5) + "\r\n")
+      })
+      pw.close()
+    }
 
     def calculateLM(): Unit = {
-
-      //Dependent variable => Home Team goals - Away Team goals
-      //Independent variable => Average previous Home Team record
-      //Independent variable => Average previous Away Team record
+      //Dependent variable => Goal Difference
+      //Independent variable => Match record
       var df = spark.sqlContext.read.format("csv").
         option("header","false").
-        option("inferSchema","true").csv("./output/TestLR.csv").
+        option("inferSchema","true").csv("./output/TrainLR.csv").
         toDF("TEAM","GD1","GD2","GD3","GD4","GD5","label")
-
 
       val assembler = new VectorAssembler()
         .setInputCols(Array("GD1","GD2","GD3","GD4","GD5","label"))
@@ -273,7 +278,7 @@ object Main {
       //Our two teams that we want to predict performance against each other
       var testData = spark.sqlContext.read.format("csv").
         option("header", "false").
-        option("inferSchema", "true").csv("./data/TargetLR").
+        option("inferSchema", "true").csv("./output/TestLR.csv").
         toDF("TEAM", "GD1", "GD2", "GD3", "GD4", "GD5", "label")
 
       val assembler2 = new VectorAssembler()
@@ -295,35 +300,49 @@ object Main {
 
       // Summarize the model over the training set and print out some metrics
       println(s"Coefficients: ${lrModel.coefficients} Intercept: ${lrModel.intercept}")
-      val trainingSummary = lrModel.summary
-      println(s"numIterations: ${trainingSummary.totalIterations}")
-      println(s"objectiveHistory: [${trainingSummary.objectiveHistory.mkString(",")}]")
-      trainingSummary.residuals.show()
-      println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
-      println(s"r2: ${trainingSummary.r2}")
+//      val trainingSummary = lrModel.summary
+//      println(s"numIterations: ${trainingSummary.totalIterations}")
+//      println(s"objectiveHistory: [${trainingSummary.objectiveHistory.mkString(",")}]")
+//      trainingSummary.residuals.show()
+//      println(s"RMSE: ${trainingSummary.rootMeanSquaredError}")
+//      println(s"r2: ${trainingSummary.r2}")
     }
 
-    def getTwoTeams(): Unit = {
-//      val team1 = scala.io.StdIn.readLine("Input team id 1: ").toInt()
-//      val team2 = scala.io.StdIn.readLine("Input team id 2: ").toInt()
-      val team1 = 9987
-      val team2 = 9984
+    def getTeamIds(team1: String, team2: String): (Int, Int) = {
+      val team1ID = teamData.filter(x=> {x.name == team1}).map(x => x.id).take(1)(0)
+      val team2ID = teamData.filter(x=> {x.name == team2}).map(x => x.id).take(1)(0)
+      (team1ID, team2ID)
+    }
 
-      val team_GD = sc.parallelize(matchData.filter(x => {
-        x.leagueID == 1729 && x.season == "2015/2016" &&
-          (x.homeID == team1 || x.homeID == team2)
+    def getRealMatchOutcome(team1: Int, team2: Int, season: String, leagueID: Int) : mutable.HashSet[String] = {
+      var s = new mutable.HashSet[String]()
+      val team_GD = matchData.filter(x => {
+        x.leagueID == leagueID && x.season == season && (x.homeID == team1 || x.homeID == team2)
       })
         .map(x => (x.homeID, x.homeGoals - x.awayGoals))
-        .collect().groupBy({ case (team, id) => team})
-        .map({ case (team, match_gd) => team + ", " + match_gd(0)._2 +
-                        ", " + match_gd(1)._2 + ", " + match_gd(2)._2 +
-                        ", " + match_gd(3)._2 + ", " + match_gd(4)._2 +
-                        ", " + match_gd(5)._2 }).toList)
-      team_GD.collect().foreach(println(_))
+        .groupByKey().mapValues(x => x.toList).collect().map({ case (team_id, gd) =>
+        s.add("Team ID: " + team_id + " " + "Actual score: " + gd(6).toString)
+      })
+      s
     }
 
-    //calculateLM()
-    //getTwoTeams()
+    def getTwoTeams(team1: Int, team2: Int, season: String, leagueID: Int): Unit = {
+      val pw = new PrintWriter("./output/TestLR.csv")
+      val team_GD = matchData.filter(x => {
+        x.leagueID == leagueID && x.season == season && (x.homeID == team1 || x.homeID == team2)
+      })
+        .map(x => (x.homeID, x.homeGoals - x.awayGoals))
+        .groupByKey().mapValues(x => x.toList).collect().map({ case (team_id, gd) =>
+        pw.write(team_id + ", " + gd(0) + ", " + gd(1) + ", " + gd(2) + ", " + gd(3) + ", " + gd(4) + ", " + gd(5) + "\r\n")
+      })
+      pw.close()
+    }
 
+    val teamIDs = getTeamIds("Bournemouth", "Arsenal")
+    createTrainingData(teamIDs._1, teamIDs._2)
+    getTwoTeams(teamIDs._1, teamIDs._2, "2015/2016", 1729)
+    calculateLM()
+    val real_outcomes = getRealMatchOutcome(teamIDs._1, teamIDs._2,"2015/2016", 1729)
+    real_outcomes.foreach(println)
   }
 }

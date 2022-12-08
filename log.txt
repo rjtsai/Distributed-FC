@@ -5,3 +5,16 @@ Ryan:
 - Create initial RDDs from cleaned dataset, 45m
 - Setup some initial RDDs from joining relevant datasets, 1h
 - Some LR research, setting up for computing LR, 1h
+
+Walter:
+- Researched linear regression - 1.5h
+- Tested model predictions with different teams - 30m
+- Analyzed/Updated some of our custom classes and setup - 30m
+- Organized our meeting teams (Creating discord/ppt/docs/report) - 45m
+- Wrote code to build our linear regression model with our training data - 3h
+
+Joshua
+- Researched Linear Regression models - 2h
+- Wrote code from Linear Regression model based on team pairings and their goal difference - 1h
+- Wrote function to convert two team names to their ids, get their gd match history, and save to CSV - 30m
+- Report work -
